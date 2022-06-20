@@ -6,6 +6,8 @@ import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid';
+import { Link } from 'react-router-dom';
+import { ROUTES } from 'constants/routes.constant';
 
 const Products: React.FC = () => {
     const columns: GridColDef[] = [
@@ -21,18 +23,15 @@ const Products: React.FC = () => {
 
     return (
         <Marco>
-            <Container maxWidth="xl" sx={{ mt: 4 }}>
-                <Box className="flex flex-row-reverse mb-4">
-                    <Button variant="contained">Crear producto</Button>
+            <Container maxWidth="lg" sx={{ mt: 4 }}>
+                <Box className="flex flex-row-reverse mb-6">
+                    <Link to={ROUTES.newProduct}>
+                        <Button variant="contained">Crear producto</Button>
+                    </Link>
                 </Box>
 
                 <Paper elevation={3} sx={{ p: 3, height: 300, width: '100%' }}>
-                    <DataGrid
-                        columns={columns}
-                        rows={rows}
-                        rowsPerPageOptions={[5, 10, 50]}
-                        pageSize={10}
-                    />
+                    <DataGrid columns={columns} rows={rows} rowsPerPageOptions={[5, 10, 50]} pageSize={10} />
                 </Paper>
             </Container>
         </Marco>
