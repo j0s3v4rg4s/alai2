@@ -1,12 +1,22 @@
 import * as React from 'react';
-import Marco from '../components/Marco';
+import { useForm, SubmitHandler } from 'react-hook-form';
+
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import { createTheme } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
-import Button from '@mui/material/Button';
-import { useForm, SubmitHandler } from 'react-hook-form';
+
+import { collection, doc, setDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+
+import Marco from '../components/Marco';
+import Button from 'components/Button';
+import { uploadFile } from 'utils/fileManager';
+import { firestore as db } from 'utils/firebase';
+
+import Message from 'components/Message';
+import { ROUTES } from 'constants/routes.constant';
 
 const theme = createTheme({
     components: {
@@ -29,11 +39,15 @@ type Inputs = {
     description: string;
     client: string;
     model: string;
-    file: File;
+    file: FileList;
 };
 
 const NewProduct = () => {
     const [url, setUrl] = React.useState<string>();
+    const [load, setLoad] = React.useState<boolean>(false);
+    const [modal, setModal] = React.useState<{ isOpen: boolean; message: string }>({ isOpen: false, message: '' });
+
+    const navigate = useNavigate();
 
     const {
         register,
@@ -41,16 +55,36 @@ const NewProduct = () => {
         formState: { isValid },
     } = useForm<Inputs>({ mode: 'onChange' });
 
-    const onSubmit: SubmitHandler<Inputs> = (data) => {
-        console.log(data);
+    const onSubmit: SubmitHandler<Inputs> = async (data) => {
+        try {
+            setLoad(true);
+            const ref = await uploadFile(`/images/products/${data.code}`, data.file[0]);
+            const product = {
+                code: data.code,
+                reference: data.reference,
+                description: data.description,
+                client: data.client,
+                model: data.model,
+                imgRef: ref.fullPath,
+                id: '',
+            };
+            const refCollection = doc(collection(db, 'products'));
+            product.id = refCollection.id;
+            await setDoc(refCollection, product);
+            setLoad(false);
+            navigate(ROUTES.product, { state: { status: 'success' } });
+        } catch (error) {
+            console.log(error);
+            setLoad(false);
+            setModal({ isOpen: true, message: 'Hubo un error' });
+        }
     };
 
     const onImageChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            const url2 = URL.createObjectURL(file);
-            console.log(url);
-            setUrl(url2);
+            const urlImage = URL.createObjectURL(file);
+            setUrl(urlImage);
         }
     };
 
@@ -113,12 +147,24 @@ const NewProduct = () => {
                     </Box>
 
                     <Box className="flex flex-row-reverse mt-4">
-                        <Button sx={{ minWidth: 130 }} variant="contained" type="submit" disabled={!isValid}>
+                        <Button
+                            sx={{ minWidth: 130 }}
+                            variant="contained"
+                            type="submit"
+                            disabled={!isValid}
+                            load={load}
+                        >
                             Crear
                         </Button>
                     </Box>
                 </form>
             </Container>
+            <Message
+                actionColor="error"
+                message={modal.message}
+                open={modal.isOpen}
+                close={() => setModal({ ...modal, isOpen: false })}
+            />
         </Marco>
     );
 };
