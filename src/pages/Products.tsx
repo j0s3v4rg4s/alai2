@@ -36,7 +36,7 @@ const Products: React.FC = () => {
     ];
 
     return (
-        <Marco>
+        <Marco title="Productos" to={ROUTES.product}>
             <Container maxWidth="lg" sx={{ mt: 4 }}>
                 <Box className="flex flex-row-reverse mb-6">
                     <Link to={ROUTES.newProduct}>

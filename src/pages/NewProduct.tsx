@@ -89,7 +89,7 @@ const NewProduct = () => {
     };
 
     return (
-        <Marco>
+        <Marco title="Productos" to={ROUTES.product}>
             <Container maxWidth="lg" sx={{ mt: 4 }}>
                 <h1 className="text-3xl sm:text-5xl">Crear producto</h1>
                 <form onSubmit={handleSubmit(onSubmit)}>
