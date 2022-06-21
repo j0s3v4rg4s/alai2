@@ -7,7 +7,7 @@ import { Routes, Route } from 'react-router-dom';
 import { THEME } from 'constants/theme';
 import Products from 'pages/Products';
 import NewProduct from './pages/NewProduct';
-import { ROUTES } from './constants/routes.constant';
+import { ROUTES } from 'constants/routes.constant';
 
 function App() {
     return (

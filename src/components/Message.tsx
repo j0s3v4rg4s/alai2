@@ -12,7 +12,7 @@ const Message: React.FC<SnackbarProps & { close?: () => void; actionColor?: Aler
     };
 
     return (
-        <Snackbar {...snackProps} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} onClose={handleClose}>
+        <Snackbar {...snackProps} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} onClose={handleClose}>
             <Alert severity={actionColor} onClose={() => close?.()}>
                 {message}
             </Alert>
