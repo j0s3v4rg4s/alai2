@@ -17,6 +17,7 @@ import { firestore as db } from 'utils/firebase';
 
 import Message from 'components/Message';
 import { ROUTES } from 'constants/routes.constant';
+import { ProductModel } from 'models/product.model';
 
 const theme = createTheme({
     components: {
@@ -59,7 +60,7 @@ const NewProduct = () => {
         try {
             setLoad(true);
             const ref = await uploadFile(`/images/products/${data.code}`, data.file[0]);
-            const product = {
+            const product: ProductModel = {
                 code: data.code,
                 reference: data.reference,
                 description: data.description,

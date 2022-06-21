@@ -5,17 +5,74 @@ import Paper from '@mui/material/Paper';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { DataGrid, GridColDef, GridRowsProp } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import EditIcon from '@mui/icons-material/Edit';
 
 import { useLocation } from 'react-router-dom';
+import { collection, query, onSnapshot, Query } from 'firebase/firestore';
 
 import Marco from 'components/Marco';
 import { ROUTES } from 'constants/routes.constant';
 import Message from 'components/Message';
+import { firestore as db } from 'utils/firebase';
+import { ProductModel } from 'models/product.model';
+import { downloadFile } from 'utils/fileManager';
+import IconButton from '@mui/material/IconButton';
+
+const columns: GridColDef[] = [
+    {
+        field: 'img',
+        headerName: 'Imagen',
+        minWidth: 160,
+        align: 'center',
+        flex: 1,
+        hideable: false,
+        renderCell: (params) => {
+            return <img src={params.value} alt="" className="w-40 h-40 object-cover" />;
+        },
+    },
+    { field: 'code', headerName: 'Código', flex: 1 },
+    {
+        field: 'reference',
+        headerName: 'Referencia',
+        hideable: false,
+        flex: 1,
+    },
+    { field: 'client', headerName: 'Cliente', flex: 1 },
+    {
+        field: 'model',
+        headerName: 'Modelo o portamolde',
+        minWidth: 200,
+        hideable: false,
+    },
+    {
+        width: 50,
+        sortable: false,
+        disableColumnMenu: true,
+        field: 'actions',
+        headerName: '',
+        align: 'center',
+        renderCell: (params) => (
+            <IconButton>
+                <EditIcon />
+            </IconButton>
+        ),
+    },
+];
+
+type FieldTable = { img: string; code: string; reference: string; client: string; model: string; id: string };
+type ShowTable = { img: boolean; reference: boolean; model: boolean };
 
 const Products: React.FC = () => {
     const location = useLocation();
     const [modal, setModal] = React.useState<{ isOpen: boolean; message: string }>({ isOpen: false, message: '' });
+    const [rows, setRows] = React.useState<FieldTable[]>(() => []);
+    const [rowHeight, setRowHeight] = React.useState<number>(40);
+    const [colTable, setColTable] = React.useState<ShowTable>({ img: false, model: false, reference: false });
+    const theme = useTheme();
+    const matches = useMediaQuery(theme.breakpoints.up('sm'));
 
     React.useEffect(() => {
         const state = location.state as { status: string } | null;
@@ -24,28 +81,57 @@ const Products: React.FC = () => {
         }
     }, [location]);
 
-    const columns: GridColDef[] = [
-        { field: 'code', type: 'date', headerName: 'Código', flex: 1 },
-        { field: 'reference', type: 'string', headerName: 'Referencia', flex: 1 },
-    ];
+    React.useEffect(() => {
+        const q = query(collection(db, 'products')) as Query<ProductModel>;
+        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+            for await (let data of querySnapshot.docs) {
+                const product = data.data();
+                const urlImage = await downloadFile(product.imgRef);
+                setRows((previous) => [
+                    ...previous,
+                    {
+                        code: product.code,
+                        img: urlImage,
+                        reference: product.reference,
+                        client: product.client,
+                        model: product.model,
+                        id: data.id,
+                    },
+                ]);
+            }
+        });
+        return () => unsubscribe();
+    }, []);
 
-    const rows: GridRowsProp = [
-        { code: new Date(), reference: '2', id: 0 },
-        { code: true, reference: '3', id: 1 },
-        { code: true, reference: '4', id: 3 },
-    ];
+    React.useEffect(() => {
+        if (matches) {
+            setRowHeight(160);
+            setColTable({ img: true, reference: true, model: true });
+        } else {
+            setColTable({ img: false, reference: false, model: false });
+            setRowHeight(40);
+        }
+    }, [matches]);
 
     return (
         <Marco title="Productos" to={ROUTES.product}>
-            <Container maxWidth="lg" sx={{ mt: 4 }}>
+            <Container maxWidth="lg" sx={{ pt: 4, display: 'flex', pb: 4 }} className="flex-col h-full">
                 <Box className="flex flex-row-reverse mb-6">
                     <Link to={ROUTES.newProduct}>
                         <Button variant="contained">Crear producto</Button>
                     </Link>
                 </Box>
 
-                <Paper elevation={3} sx={{ p: 3, height: 300, width: '100%' }}>
-                    <DataGrid columns={columns} rows={rows} rowsPerPageOptions={[5, 10, 50]} pageSize={10} />
+                <Paper elevation={3} sx={{ p: 3, width: '100%' }} className="flex-1">
+                    <DataGrid
+                        disableSelectionOnClick={true}
+                        columnVisibilityModel={colTable}
+                        rowHeight={rowHeight}
+                        columns={columns}
+                        rows={rows}
+                        rowsPerPageOptions={[5, 10, 50]}
+                        pageSize={10}
+                    />
                 </Paper>
             </Container>
             <Message

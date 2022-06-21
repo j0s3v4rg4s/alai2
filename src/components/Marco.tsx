@@ -15,7 +15,7 @@ interface MarcoProps {
 
 const Marco: React.FC<MarcoProps> = (props) => {
     return (
-        <Box>
+        <Box className="flex flex-col h-screen">
             <AppBar position="static">
                 <Toolbar>
                     <IconButton size="large" edge="start" color="inherit" aria-label="menu">
@@ -27,7 +27,7 @@ const Marco: React.FC<MarcoProps> = (props) => {
                     </Typography>
                 </Toolbar>
             </AppBar>
-            <Box>{props.children}</Box>
+            <Box className="flex-1 overflow-auto">{props.children}</Box>
         </Box>
     );
 };
