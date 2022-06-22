@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
+import 'css/marco.css'
 
 interface MarcoProps {
     children?: React.ReactNode;
@@ -15,7 +16,7 @@ interface MarcoProps {
 
 const Marco: React.FC<MarcoProps> = (props) => {
     return (
-        <Box className="flex flex-col h-screen">
+        <Box className="flex flex-col Marco">
             <AppBar position="static">
                 <Toolbar>
                     <IconButton size="large" edge="start" color="inherit" aria-label="menu">
