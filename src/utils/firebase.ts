@@ -1,7 +1,7 @@
-import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
-import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { initializeApp } from 'firebase/app';
+import { connectFirestoreEmulator,getFirestore } from 'firebase/firestore';
+import { connectStorageEmulator,getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
     apiKey: 'AIzaSyDt3eCRC30e-d3V77j3EnBhgyp6r3GHNMc',

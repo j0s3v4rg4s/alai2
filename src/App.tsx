@@ -1,14 +1,16 @@
 import React from 'react';
+import { Route,Routes } from 'react-router-dom';
+
+import { ThemeProvider } from '@mui/material/styles';
+
+import { ROUTES } from 'constants/routes.constant';
+import { THEME } from 'constants/theme';
+import ProductDetail from 'pages/ProductDetail';
+import Products from 'pages/Products';
+
+import NewProduct from './pages/NewProduct';
 
 import './App.css';
-import { ThemeProvider } from '@mui/material/styles';
-import { Routes, Route } from 'react-router-dom';
-
-import { THEME } from 'constants/theme';
-import Products from 'pages/Products';
-import NewProduct from './pages/NewProduct';
-import ProductDetail from 'pages/ProductDetail';
-import { ROUTES } from 'constants/routes.constant';
 
 function App() {
     return (
