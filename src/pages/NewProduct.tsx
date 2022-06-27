@@ -1,8 +1,11 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import IconButton from '@mui/material/IconButton';
+import Toolbar from '@mui/material/Toolbar';
 
 import Button from 'components/Button';
 import Marco from 'components/Marco';
@@ -51,7 +54,12 @@ const NewProduct = () => {
     return (
         <Marco title="Productos" to={ROUTES.product}>
             <Container maxWidth="lg" className="py-4">
-                <h1 className="text-3xl sm:text-5xl">Crear producto</h1>
+                <Toolbar>
+                    <IconButton edge="start" onClick={() => navigate(ROUTES.product, { replace: true })}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <h1 className="text-3xl sm:text-2xl">Crear producto</h1>
+                </Toolbar>
                 <ProductForm onValid={(valid) => setIsValid(valid)} submit={(data) => onSubmit(data)}>
                     <Box className="flex flex-row-reverse mt-4">
                         <Button
