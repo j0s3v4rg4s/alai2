@@ -1,26 +1,25 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
-import Paper from '@mui/material/Paper';
-import Container from '@mui/material/Container';
+import ImageIcon from '@mui/icons-material/Image';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import Container from '@mui/material/Container';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import ImageIcon from '@mui/icons-material/Image';
-
-import { useLocation } from 'react-router-dom';
-import { collection, query, onSnapshot, Query } from 'firebase/firestore';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 
 import Marco from 'components/Marco';
-import { ROUTES } from 'constants/routes.constant';
 import Message from 'components/Message';
-import { firestore as db } from 'utils/firebase';
+import { ROUTES } from 'constants/routes.constant';
+import { collection, onSnapshot, Query,query } from 'firebase/firestore';
 import { ProductModel } from 'models/product.model';
 import { downloadFile } from 'utils/fileManager';
-import IconButton from '@mui/material/IconButton';
+import { firestore as db } from 'utils/firebase';
 
 const columns: GridColDef[] = [
     {
@@ -85,8 +84,13 @@ const Products: React.FC = () => {
 
     React.useEffect(() => {
         const state = location.state as { status: string } | null;
-        if (state?.status === 'success') {
-            setModal({ isOpen: true, message: 'Producto creado' });
+        switch (state?.status) {
+            case 'success':
+                setModal({ isOpen: true, message: 'Producto creado' });
+                break;
+            case 'update':
+                setModal({ isOpen: true, message: 'Producto actualizado' });
+                break;
         }
     }, [location]);
 

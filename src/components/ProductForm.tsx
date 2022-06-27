@@ -1,9 +1,13 @@
 import * as React from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+
+import { createTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import { ThemeProvider } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { createTheme } from '@mui/material';
+
+import { ProductModel } from 'models/product.model';
+import { downloadFile } from 'utils/fileManager';
 
 export type InputsProduct = {
     code: string;
@@ -32,6 +36,7 @@ const theme = createTheme({
 export interface ProductFormProps {
     onValid?: (isValid: boolean) => void;
     submit?: (data: InputsProduct) => void;
+    product?: ProductModel;
     children?: React.ReactNode;
 }
 
@@ -41,7 +46,25 @@ const ProductForm: React.FC<ProductFormProps> = (props) => {
         register,
         handleSubmit,
         formState: { isValid },
-    } = useForm<InputsProduct>({ mode: 'onChange' });
+    } = useForm<InputsProduct>({
+        mode: 'onChange',
+        defaultValues: {
+            code: props.product?.code,
+            client: props.product?.client,
+            model: props.product?.model,
+            reference: props.product?.reference,
+            description: props.product?.description,
+        },
+    });
+
+    React.useEffect(() => {
+        const ref = props.product?.imgRef;
+        if (!!ref) {
+            downloadFile(ref).then((data) => {
+                setUrl(data);
+            });
+        }
+    }, [props.product?.imgRef]);
 
     const onImageChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const file = e.target.files?.[0];

@@ -1,21 +1,19 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 
-import { collection, doc, setDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
-import { StorageReference } from 'firebase/storage';
-
-import Marco from '../components/Marco';
 import Button from 'components/Button';
+import Marco from 'components/Marco';
+import Message from 'components/Message';
+import ProductForm, { InputsProduct } from 'components/ProductForm';
+import { ROUTES } from 'constants/routes.constant';
+import { collection, doc, setDoc } from 'firebase/firestore';
+import { StorageReference } from 'firebase/storage';
+import { ProductModel } from 'models/product.model';
 import { uploadFile } from 'utils/fileManager';
 import { firestore as db } from 'utils/firebase';
-
-import Message from 'components/Message';
-import { ROUTES } from 'constants/routes.constant';
-import { ProductModel } from 'models/product.model';
-import ProductForm, { InputsProduct } from '../components/ProductForm';
 
 const NewProduct = () => {
     const [isValid, setIsValid] = React.useState<boolean>();
