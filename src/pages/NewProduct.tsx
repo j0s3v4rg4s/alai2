@@ -1,14 +1,11 @@
 import * as React from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
 
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
-import { createTheme } from '@mui/material';
-import { ThemeProvider } from '@mui/material/styles';
 
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { StorageReference } from 'firebase/storage';
 
 import Marco from '../components/Marco';
 import Button from 'components/Button';
@@ -18,55 +15,27 @@ import { firestore as db } from 'utils/firebase';
 import Message from 'components/Message';
 import { ROUTES } from 'constants/routes.constant';
 import { ProductModel } from 'models/product.model';
-
-const theme = createTheme({
-    components: {
-        MuiInputBase: {
-            styleOverrides: {
-                root: {
-                    height: '100%',
-                },
-                multiline: {
-                    height: '100%',
-                },
-            },
-        },
-    },
-});
-
-type Inputs = {
-    code: string;
-    reference: string;
-    description: string;
-    client: string;
-    model: string;
-    file: FileList;
-};
+import ProductForm, { InputsProduct } from '../components/ProductForm';
 
 const NewProduct = () => {
-    const [url, setUrl] = React.useState<string>();
+    const [isValid, setIsValid] = React.useState<boolean>();
     const [load, setLoad] = React.useState<boolean>(false);
     const [modal, setModal] = React.useState<{ isOpen: boolean; message: string }>({ isOpen: false, message: '' });
 
     const navigate = useNavigate();
 
-    const {
-        register,
-        handleSubmit,
-        formState: { isValid },
-    } = useForm<Inputs>({ mode: 'onChange' });
-
-    const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    const onSubmit = async (data: InputsProduct) => {
         try {
             setLoad(true);
-            const ref = await uploadFile(`/images/products/${data.code}`, data.file[0]);
+            let ref: StorageReference | undefined;
+            ref = data.file.length ? await uploadFile(`/images/products/${data.code}`, data.file[0]) : undefined;
             const product: ProductModel = {
                 code: data.code,
                 reference: data.reference,
                 description: data.description,
                 client: data.client,
                 model: data.model,
-                imgRef: ref.fullPath,
+                imgRef: ref?.fullPath || null,
                 id: '',
             };
             const refCollection = doc(collection(db, 'products'));
@@ -81,72 +50,11 @@ const NewProduct = () => {
         }
     };
 
-    const onImageChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const urlImage = URL.createObjectURL(file);
-            setUrl(urlImage);
-        }
-    };
-
     return (
         <Marco title="Productos" to={ROUTES.product}>
-            <Container maxWidth="lg" sx={{ mt: 4 }}>
+            <Container maxWidth="lg" className="py-4">
                 <h1 className="text-3xl sm:text-5xl">Crear producto</h1>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <Box sx={{ mt: 4 }} className="grid grid-cols-1 sm:grid-cols-6 gap-4 justify-items-center">
-                        <ThemeProvider theme={theme}>
-                            <label className="relative sm:col-span-2 sm:row-span-3 w-64 h-64 sw:w-80 sw:h-80 rounded-xl border-4 border-gray-400 border-dashed flex justify-center items-center">
-                                {url ? (
-                                    <img src={url} alt="" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div>
-                                        <p>Seleccionar imagen</p>
-                                    </div>
-                                )}
-
-                                <input
-                                    type="file"
-                                    className="absolute w-0 h-0"
-                                    {...register('file', { required: true })}
-                                    onChange={onImageChange}
-                                />
-                            </label>
-                            <TextField
-                                {...register('code', { required: true })}
-                                className="sm:col-span-2 w-full"
-                                label="Código"
-                                variant="outlined"
-                            />
-                            <TextField
-                                {...register('reference', { required: true })}
-                                className="sm:col-span-2 w-full"
-                                label="Referencia"
-                                variant="outlined"
-                            />
-                            <TextField
-                                {...register('description', { required: true })}
-                                className="sm:col-span-2 sm:row-span-2 w-full h-full"
-                                label="Descripción"
-                                multiline
-                                rows={5}
-                                variant="outlined"
-                            />
-                            <TextField
-                                {...register('client', { required: true })}
-                                className="sm:col-span-2 w-full"
-                                label="Cliente"
-                                variant="outlined"
-                            />
-                            <TextField
-                                {...register('model', { required: true })}
-                                className="sm:col-span-2 w-full"
-                                label="Modelo o portamolde"
-                                variant="outlined"
-                            />
-                        </ThemeProvider>
-                    </Box>
-
+                <ProductForm onValid={(valid) => setIsValid(valid)} submit={(data) => onSubmit(data)}>
                     <Box className="flex flex-row-reverse mt-4">
                         <Button
                             sx={{ minWidth: 130 }}
@@ -158,7 +66,7 @@ const NewProduct = () => {
                             Crear
                         </Button>
                     </Box>
-                </form>
+                </ProductForm>
             </Container>
             <Message
                 actionColor="error"

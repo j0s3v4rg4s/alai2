@@ -8,7 +8,8 @@ import Button from '@mui/material/Button';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import EditIcon from '@mui/icons-material/Edit';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import ImageIcon from '@mui/icons-material/Image';
 
 import { useLocation } from 'react-router-dom';
 import { collection, query, onSnapshot, Query } from 'firebase/firestore';
@@ -30,7 +31,13 @@ const columns: GridColDef[] = [
         flex: 1,
         hideable: false,
         renderCell: (params) => {
-            return <img src={params.value} alt="" className="w-40 h-40 object-cover" />;
+            return params.value ? (
+                <img src={params.value} alt="" className="w-40 h-40 object-cover" />
+            ) : (
+                <Box sx={{ fontSize: '80px' }}>
+                    <ImageIcon fontSize="inherit" color="info" />
+                </Box>
+            );
         },
     },
     { field: 'code', headerName: 'Código', flex: 1 },
@@ -48,21 +55,23 @@ const columns: GridColDef[] = [
         hideable: false,
     },
     {
-        width: 50,
+        width: 70,
         sortable: false,
         disableColumnMenu: true,
         field: 'actions',
         headerName: '',
         align: 'center',
         renderCell: (params) => (
-            <IconButton>
-                <EditIcon />
-            </IconButton>
+            <Link to={`${ROUTES.detailProduct}/${params.row.id}`}>
+                <IconButton>
+                    <RemoveRedEyeIcon />
+                </IconButton>
+            </Link>
         ),
     },
 ];
 
-type FieldTable = { img: string; code: string; reference: string; client: string; model: string; id: string };
+type FieldTable = { img: string | null; code: string; reference: string; client: string; model: string; id: string };
 type ShowTable = { img: boolean; reference: boolean; model: boolean };
 
 const Products: React.FC = () => {
@@ -86,7 +95,7 @@ const Products: React.FC = () => {
         const unsubscribe = onSnapshot(q, async (querySnapshot) => {
             for await (let data of querySnapshot.docs) {
                 const product = data.data();
-                const urlImage = await downloadFile(product.imgRef);
+                const urlImage = product.imgRef ? await downloadFile(product.imgRef) : null;
                 setRows((previous) => [
                     ...previous,
                     {

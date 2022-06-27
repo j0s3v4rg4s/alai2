@@ -4,6 +4,6 @@ export interface ProductModel {
     description: string;
     client: string;
     model: string;
-    imgRef: string;
+    imgRef: string | null;
     id: string;
 }
