@@ -20,11 +20,11 @@ jobs:
       - run: cat .env
       - name: build
         run: yarn build
-      - run: npm i -g firebase-tools
-      - run: firebase deploy --token ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ALAI_PROD }}
-#      - uses: FirebaseExtended/action-hosting-deploy@v0
-#        with:
-#          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-#          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ALAI_PROD }}'
-#          channelId: live
-#          projectId: alai-prod
+#      - run: npm i -g firebase-tools
+#      - run: firebase deploy --token ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ALAI_PROD }}
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ALAI_PROD }}'
+          channelId: live
+          projectId: alai-prod
