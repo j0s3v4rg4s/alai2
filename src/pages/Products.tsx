@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import ImageIcon from '@mui/icons-material/Image';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
@@ -13,17 +12,16 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 
+import ImgStorage from 'components/imgStorage';
 import Marco from 'components/Marco';
 import Message from 'components/Message';
 import { ROUTES } from 'constants/routes.constant';
-import { collection, onSnapshot, Query,query } from 'firebase/firestore';
-import { ProductModel } from 'models/product.model';
-import { downloadFile } from 'utils/fileManager';
-import { firestore as db } from 'utils/firebase';
+import { definitions } from 'types/supabase';
+import { supabase } from 'utils/superbase';
 
 const columns: GridColDef[] = [
     {
-        field: 'img',
+        field: 'imgRef',
         headerName: 'Imagen',
         minWidth: 160,
         align: 'center',
@@ -31,7 +29,7 @@ const columns: GridColDef[] = [
         hideable: false,
         renderCell: (params) => {
             return params.value ? (
-                <img src={params.value} alt="" className="w-40 h-40 object-cover" />
+                <ImgStorage path={params.value} alt="" className="w-40 h-40 object-cover" />
             ) : (
                 <Box sx={{ fontSize: '80px' }}>
                     <ImageIcon fontSize="inherit" color="info" />
@@ -40,13 +38,6 @@ const columns: GridColDef[] = [
         },
     },
     { field: 'code', headerName: 'Código', flex: 1 },
-    {
-        field: 'reference',
-        headerName: 'Referencia',
-        hideable: false,
-        flex: 1,
-    },
-    { field: 'client', headerName: 'Cliente', flex: 1 },
     {
         field: 'model',
         headerName: 'Modelo o portamolde',
@@ -70,15 +61,17 @@ const columns: GridColDef[] = [
     },
 ];
 
-type FieldTable = { img: string | null; code: string; reference: string; client: string; model: string; id: string };
-type ShowTable = { img: boolean; reference: boolean; model: boolean };
+type FieldTable = Partial<definitions['product']>;
+type ShowTable = { imgRef: boolean; model: boolean };
+
+
 
 const Products: React.FC = () => {
     const location = useLocation();
     const [modal, setModal] = React.useState<{ isOpen: boolean; message: string }>({ isOpen: false, message: '' });
     const [rows, setRows] = React.useState<FieldTable[]>(() => []);
     const [rowHeight, setRowHeight] = React.useState<number>(40);
-    const [colTable, setColTable] = React.useState<ShowTable>({ img: false, model: false, reference: false });
+    const [colTable, setColTable] = React.useState<ShowTable>({ imgRef: false, model: false });
     const theme = useTheme();
     const matches = useMediaQuery(theme.breakpoints.up('sm'));
 
@@ -95,33 +88,24 @@ const Products: React.FC = () => {
     }, [location]);
 
     React.useEffect(() => {
-        const q = query(collection(db, 'products')) as Query<ProductModel>;
-        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-            for await (let data of querySnapshot.docs) {
-                const product = data.data();
-                const urlImage = product.imgRef ? await downloadFile(product.imgRef) : null;
-                setRows((previous) => [
-                    ...previous,
-                    {
-                        code: product.code,
-                        img: urlImage,
-                        reference: product.reference,
-                        client: product.client,
-                        model: product.model,
-                        id: data.id,
-                    },
-                ]);
-            }
-        });
-        return () => unsubscribe();
+        supabase
+            .from<definitions['product']>('product')
+            .select('*')
+            .then(({ data }) => {
+                if (data && data.length) {
+                    data.forEach((item) => {
+                        setRows((pre) => [...pre, item]);
+                    });
+                }
+            });
     }, []);
 
     React.useEffect(() => {
         if (matches) {
             setRowHeight(160);
-            setColTable({ img: true, reference: true, model: true });
+            setColTable({ imgRef: true, model: true });
         } else {
-            setColTable({ img: false, reference: false, model: false });
+            setColTable({ imgRef: false, model: false });
             setRowHeight(40);
         }
     }, [matches]);

@@ -6,14 +6,13 @@ import Box from '@mui/material/Box';
 import { ThemeProvider } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 
-import { ProductModel } from 'models/product.model';
-import { downloadFile } from 'utils/fileManager';
+import { STORAGE } from 'constants/storage.constants';
+import { definitions } from 'types/supabase';
+import { downloadFile } from 'utils/superbase';
 
 export type InputsProduct = {
     code: string;
-    reference: string;
     description: string;
-    client: string;
     model: string;
     file: FileList;
 };
@@ -36,7 +35,7 @@ const theme = createTheme({
 export interface ProductFormProps {
     onValid?: (isValid: boolean) => void;
     submit?: (data: InputsProduct) => void;
-    product?: ProductModel;
+    product?: definitions['product'];
     children?: React.ReactNode;
 }
 
@@ -50,18 +49,19 @@ const ProductForm: React.FC<ProductFormProps> = (props) => {
         mode: 'onChange',
         defaultValues: {
             code: props.product?.code,
-            client: props.product?.client,
             model: props.product?.model,
-            reference: props.product?.reference,
             description: props.product?.description,
         },
     });
 
     React.useEffect(() => {
-        const ref = props.product?.imgRef;
-        if (!!ref) {
-            downloadFile(ref).then((data) => {
-                setUrl(data);
+        const path = props.product?.imgRef;
+        if (!!path) {
+            downloadFile(STORAGE.bucketName, path).then((data) => {
+                if(data) {
+                    const objectURL = URL.createObjectURL(data);
+                    setUrl(objectURL);
+                }
             });
         }
     }, [props.product?.imgRef]);
@@ -110,23 +110,11 @@ const ProductForm: React.FC<ProductFormProps> = (props) => {
                         variant="outlined"
                     />
                     <TextField
-                        {...register('reference', { required: true })}
-                        className="sm:col-span-2 w-full"
-                        label="Referencia"
-                        variant="outlined"
-                    />
-                    <TextField
                         {...register('description', { required: true })}
                         className="sm:col-span-2 sm:row-span-2 w-full h-full"
                         label="Descripción"
                         multiline
                         rows={5}
-                        variant="outlined"
-                    />
-                    <TextField
-                        {...register('client', { required: true })}
-                        className="sm:col-span-2 w-full"
-                        label="Cliente"
                         variant="outlined"
                     />
                     <TextField

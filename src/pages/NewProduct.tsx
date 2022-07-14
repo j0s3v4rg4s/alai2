@@ -12,11 +12,10 @@ import Marco from 'components/Marco';
 import Message from 'components/Message';
 import ProductForm, { InputsProduct } from 'components/ProductForm';
 import { ROUTES } from 'constants/routes.constant';
-import { collection, doc, setDoc } from 'firebase/firestore';
-import { StorageReference } from 'firebase/storage';
-import { ProductModel } from 'models/product.model';
-import { uploadFile } from 'utils/fileManager';
-import { firestore as db } from 'utils/firebase';
+import { STORAGE } from 'constants/storage.constants';
+import { TABLE_NAME } from 'constants/table.constants';
+import { definitions } from 'types/supabase';
+import { supabase } from 'utils/superbase';
 
 const NewProduct = () => {
     const [isValid, setIsValid] = React.useState<boolean>();
@@ -28,21 +27,42 @@ const NewProduct = () => {
     const onSubmit = async (data: InputsProduct) => {
         try {
             setLoad(true);
-            let ref: StorageReference | undefined;
-            ref = data.file.length ? await uploadFile(`/images/products/${data.code}`, data.file[0]) : undefined;
-            const product: ProductModel = {
-                code: data.code,
-                reference: data.reference,
-                description: data.description,
-                client: data.client,
-                model: data.model,
-                imgRef: ref?.fullPath || null,
-                id: '',
-            };
-            const refCollection = doc(collection(db, 'products'));
-            product.id = refCollection.id;
-            await setDoc(refCollection, product);
-            setLoad(false);
+            await supabase.storage.getBucket('tempo');
+
+            const resultDb = await supabase.from<definitions['product']>(TABLE_NAME.product).insert([
+                {
+                    code: data.code,
+                    description: data.description,
+                    model: data.model,
+                },
+            ]);
+
+            if (resultDb.error) {
+                console.log(resultDb.error);
+                setModal({ isOpen: true, message: 'Hubo un error' });
+                setLoad(false);
+                return;
+            }
+
+            if (data.file.length) {
+                const path = `products/${resultDb.data[0].id}`;
+                const resultStorage = await supabase.storage.from(STORAGE.bucketName).upload(path, data.file[0]);
+                await supabase
+                    .from<definitions['product']>(TABLE_NAME.product)
+                    .update({ imgRef: path })
+                    .eq('id', resultDb.data[0].id);
+                if (resultStorage.error) {
+                    console.log(resultStorage.error);
+                    await supabase
+                        .from<definitions['product']>(TABLE_NAME.product)
+                        .delete()
+                        .eq('id', resultDb.data[0].id);
+                    setLoad(false);
+                    setModal({ isOpen: true, message: 'Hubo un error subiendo la imagen' });
+                    return;
+                }
+            }
+
             navigate(ROUTES.product, { state: { status: 'success' } });
         } catch (error) {
             console.log(error);

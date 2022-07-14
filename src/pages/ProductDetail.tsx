@@ -14,12 +14,10 @@ import Marco from 'components/Marco';
 import Message from 'components/Message';
 import ProductForm, { InputsProduct } from 'components/ProductForm';
 import { ROUTES } from 'constants/routes.constant';
-import { deleteDoc, updateDoc } from 'firebase/firestore';
-import { StorageReference } from 'firebase/storage';
-import * as _ from 'lodash';
-import { ProductModel } from 'models/product.model';
-import { uploadFile } from 'utils/fileManager';
-import { getReference, useDoc } from 'utils/firestore';
+import { STORAGE } from 'constants/storage.constants';
+import { TABLE_NAME } from 'constants/table.constants';
+import { definitions } from 'types/supabase';
+import { supabase, useGetRows } from 'utils/superbase';
 
 const ProductDetail = () => {
     const [load, setLoad] = React.useState<boolean>(false);
@@ -28,34 +26,26 @@ const ProductDetail = () => {
 
     const { id } = useParams();
     const navigate = useNavigate();
-    const snap = useDoc<ProductModel>('products', id!);
 
-    const product = snap?.data();
+    const product = useGetRows<definitions['product']>(TABLE_NAME.product, 'id', id);
 
     const handleSubmit = async (data: InputsProduct) => {
         try {
             setLoad(true);
-            let ref: StorageReference | undefined;
-            if (data.file.length && product?.imgRef) {
-                ref = await uploadFile(product.imgRef, data.file[0]);
+            let ref: string | undefined;
+            if (data.file.length && product?.[0]?.imgRef) {
+                await supabase.storage.from(STORAGE.bucketName).update(`products/${id}`, data.file[0]);
+                ref = `products/${id}`;
             } else if (data.file.length) {
-                ref = await uploadFile(`/images/products/${data.code}`, data.file[0]);
+                await supabase.storage.from(STORAGE.bucketName).upload(`products/${id}`, data.file[0]);
+                ref = `products/${id}`;
             }
-            const productUpdate: ProductModel = {
-                code: data.code,
-                reference: data.reference,
-                description: data.description,
-                client: data.client,
-                model: data.model,
-                imgRef: ref?.fullPath || product?.imgRef || null,
-                id: id!,
-            };
 
-            const isEq = _.isEqual(productUpdate, product);
-            if (!isEq) {
-                const refProduct = getReference<ProductModel>('products', id!);
-                await updateDoc(refProduct, productUpdate);
-            }
+            await supabase
+                .from<definitions['product']>(TABLE_NAME.product)
+                .update({ code: data.code, imgRef: ref, model: data.model, description: data.description })
+                .eq('id', id);
+
             setLoad(false);
             navigate(ROUTES.product, { state: { status: 'update' } });
         } catch (e) {
@@ -67,8 +57,12 @@ const ProductDetail = () => {
 
     const handleDelete = async () => {
         setIsConfirm(false);
-        const refProduct = getReference('products', id!);
-        await deleteDoc(refProduct);
+        setLoad(true);
+        await supabase.from<definitions['product']>(TABLE_NAME.product).delete().eq('id', id);
+        if (product?.[0].imgRef) {
+            await supabase.storage.from(STORAGE.bucketName).remove([product[0].imgRef]);
+        }
+        setLoad(false);
         navigate(ROUTES.product);
     };
     return (
@@ -81,7 +75,7 @@ const ProductDetail = () => {
                     <h1 className="text-3xl sm:text-2xl">Detalle producto</h1>
                 </Toolbar>
                 {product ? (
-                    <ProductForm product={product} submit={(data) => handleSubmit(data)}>
+                    <ProductForm product={product[0]} submit={(data) => handleSubmit(data)}>
                         <Box className="flex flex-row-reverse mt-4 gap-4">
                             <Button variant="contained" type="submit" load={load}>
                                 actualizar

@@ -8,6 +8,7 @@
     "@mui/icons-material": "5.8.3",
     "@mui/material": "5.8.3",
     "@mui/x-data-grid": "5.12.0",
+    "@supabase/supabase-js": "1.35.4",
     "@testing-library/jest-dom": "5.16.4",
     "@testing-library/react": "13.3.0",
     "@testing-library/user-event": "13.5.0",
@@ -32,7 +33,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "prettier": "prettier --write ./src"
+    "prettier": "prettier --write ./src",
+    "generate-types": "npx openapi-typescript http://localhost:54321/rest/v1/?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24ifQ.625_WdcF3KHqz5amU0x2X5WWHP-OEs_4qj0ssLNHzTs --output src/types/supabase.ts"
   },
   "eslintConfig": {
     "extends": [

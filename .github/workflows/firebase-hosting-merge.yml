@@ -11,7 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: yarn install --frozen-lockfile && yarn build
+      - run: yarn install --frozen-lockfile
+      - name: build
+        run: yarn build
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          REACT_APP_SUPABASE_URL: https://nclmpsxqcukhblzqdcjn.supabase.co
+          REACT_APP_SUPABASE_API: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jbG1wc3hxY3VraGJsenFkY2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTc4MjEyNjYsImV4cCI6MTk3MzM5NzI2Nn0.9BFxboRgyfhM3bwVWltddynggCEI1CApTgqev9QWMWw
+      - run: cat .env
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
