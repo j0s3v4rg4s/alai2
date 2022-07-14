@@ -27,8 +27,6 @@ const NewProduct = () => {
     const onSubmit = async (data: InputsProduct) => {
         try {
             setLoad(true);
-            await supabase.storage.getBucket('tempo');
-
             const resultDb = await supabase.from<definitions['product']>(TABLE_NAME.product).insert([
                 {
                     code: data.code,
