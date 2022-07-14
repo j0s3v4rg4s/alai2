@@ -16,6 +16,7 @@
     "@types/node": "16.11.39",
     "@types/react": "18.0.12",
     "@types/react-dom": "18.0.5",
+    "env-cmd": "^10.1.0",
     "firebase": "9.8.2",
     "lodash": "4.17.21",
     "lodash.eq": "4.0.0",
@@ -30,7 +31,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "env-cmd -f .env react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "prettier": "prettier --write ./src",
