@@ -20,7 +20,6 @@ jobs:
           REACT_APP_SUPABASE_URL: https://nclmpsxqcukhblzqdcjn.supabase.co
           REACT_APP_SUPABASE_API: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jbG1wc3hxY3VraGJsenFkY2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTc4MjEyNjYsImV4cCI6MTk3MzM5NzI2Nn0.9BFxboRgyfhM3bwVWltddynggCEI1CApTgqev9QWMWw
           directory: build
-      - run: cat .env
       - run: cat build/.env
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
