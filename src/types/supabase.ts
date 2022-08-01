@@ -12,6 +12,198 @@ export interface paths {
       };
     };
   };
+  "/client": {
+    get: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.client.id"];
+          created_at?: parameters["rowFilter.client.created_at"];
+          name?: parameters["rowFilter.client.name"];
+          nit?: parameters["rowFilter.client.nit"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["client"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** client */
+          client?: definitions["client"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.client.id"];
+          created_at?: parameters["rowFilter.client.created_at"];
+          name?: parameters["rowFilter.client.name"];
+          nit?: parameters["rowFilter.client.nit"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.client.id"];
+          created_at?: parameters["rowFilter.client.created_at"];
+          name?: parameters["rowFilter.client.name"];
+          nit?: parameters["rowFilter.client.nit"];
+        };
+        body: {
+          /** client */
+          client?: definitions["client"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
+  "/client_product": {
+    get: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.client_product.id"];
+          client?: parameters["rowFilter.client_product.client"];
+          product?: parameters["rowFilter.client_product.product"];
+          reference?: parameters["rowFilter.client_product.reference"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["client_product"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** client_product */
+          client_product?: definitions["client_product"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.client_product.id"];
+          client?: parameters["rowFilter.client_product.client"];
+          product?: parameters["rowFilter.client_product.product"];
+          reference?: parameters["rowFilter.client_product.reference"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.client_product.id"];
+          client?: parameters["rowFilter.client_product.client"];
+          product?: parameters["rowFilter.client_product.product"];
+          reference?: parameters["rowFilter.client_product.reference"];
+        };
+        body: {
+          /** client_product */
+          client_product?: definitions["client_product"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
   "/product": {
     get: {
       parameters: {
@@ -117,6 +309,45 @@ export interface paths {
 }
 
 export interface definitions {
+  client: {
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     */
+    id: string;
+    /**
+     * Format: timestamp with time zone
+     * @default now()
+     */
+    created_at?: string;
+    /** Format: text */
+    name?: string;
+    /** Format: text */
+    nit?: string;
+  };
+  client_product: {
+    /**
+     * Format: bigint
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     */
+    id: number;
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Foreign Key to `client.id`.<fk table='client' column='id'/>
+     */
+    client: string;
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Foreign Key to `product.id`.<fk table='product' column='id'/>
+     */
+    product: string;
+    /** Format: text */
+    reference: string;
+  };
   product: {
     /**
      * Format: uuid
@@ -139,6 +370,29 @@ export interface definitions {
     /** Format: text */
     imgRef?: string;
   };
+}
+
+export interface clientProduct {
+    /**
+     * Format: bigint
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     */
+    id: number;
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Foreign Key to `client.id`.<fk table='client' column='id'/>
+     */
+    client: definitions['client'];
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Foreign Key to `product.id`.<fk table='product' column='id'/>
+     */
+    product: definitions['product'];
+    /** Format: text */
+    reference: string
 }
 
 export interface parameters {
@@ -174,6 +428,26 @@ export interface parameters {
   offset: string;
   /** @description Limiting and Pagination */
   limit: string;
+  /** @description client */
+  "body.client": definitions["client"];
+  /** Format: uuid */
+  "rowFilter.client.id": string;
+  /** Format: timestamp with time zone */
+  "rowFilter.client.created_at": string;
+  /** Format: text */
+  "rowFilter.client.name": string;
+  /** Format: text */
+  "rowFilter.client.nit": string;
+  /** @description client_product */
+  "body.client_product": definitions["client_product"];
+  /** Format: bigint */
+  "rowFilter.client_product.id": string;
+  /** Format: uuid */
+  "rowFilter.client_product.client": string;
+  /** Format: uuid */
+  "rowFilter.client_product.product": string;
+  /** Format: text */
+  "rowFilter.client_product.reference": string;
   /** @description product */
   "body.product": definitions["product"];
   /** Format: uuid */

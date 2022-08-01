@@ -1,3 +1,5 @@
 export const TABLE_NAME = {
-    product: 'product'
+    product: 'product',
+    clientProduct: 'client_product',
+    client: 'client'
 }
